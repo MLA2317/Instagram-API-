@@ -4,7 +4,7 @@ from rest_framework import generics, serializers, status, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializer import RegisterSerializer, LoginSerializer, LocationSerializer, ProfilesSerializer, \
-    FollowerSerializer, FollowingSerializer
+    FollowerSerializer, FollowingSerializer, AllAccountsSerializer
 from .models import Account, Location, Follower, Following
 
 
@@ -43,6 +43,12 @@ class ProfileList(generics.ListAPIView):
         queryset = Account.objects.get(id=user.id)
         serializer = self.serializer_class(queryset)
         return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+class AllAccountApi(generics.ListAPIView):
+    queryset = Account.objects.all()
+    serializer_class = AllAccountsSerializer
+    permissions = IsAuthenticated
 
 
 class FollowingViewSet(viewsets.ModelViewSet):

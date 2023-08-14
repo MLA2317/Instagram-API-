@@ -64,6 +64,14 @@ class ProfilesSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count', 'created_date')
 
 
+class AllAccountsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = (
+        'id', 'username', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count',
+        'created_date')
+
+
 class FollowingSerializer(serializers.ModelSerializer):
     users_name = serializers.SerializerMethodField()
 
