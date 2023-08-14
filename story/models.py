@@ -14,7 +14,7 @@ class Story(models.Model):
 
 class StoryMarkFollower(models.Model):
     story_id = models.ForeignKey(Story, on_delete=models.CASCADE)
-    mark = models.ManyToManyField(Following, null=True, blank=True)
+    mark = models.ManyToManyField(Following, blank=True)
 
 
 

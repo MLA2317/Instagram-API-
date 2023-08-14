@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractUser, PermissionsMixin
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.signals import pre_save, post_save
 
 
@@ -52,7 +53,7 @@ class Account(AbstractUser, PermissionsMixin):
     gender = models.CharField(max_length=20, choices=GENDER)
     email = models.EmailField()
     bio = models.TextField()
-    phone_number = models.CharField(max_length=14, verbose_name='Phone Number', null=True)
+    phone_number = PhoneNumberField(verbose_name='Phone Number', null=True, blank=True)
     avatar = models.ImageField(upload_to='profile/', null=True, blank=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='account_location', null=True)
     created_date = models.DateTimeField(auto_now_add=True)
@@ -72,21 +73,41 @@ class Account(AbstractUser, PermissionsMixin):
         else:
             return 'Image not found'
 
+    @property
+    def following_count(self):
+        following_instance = Following.objects.filter(following_user=self).first()
+        if following_instance:
+            return following_instance.users_id.count()
+        return 0
+
+
+    @property
+    def follower_count(self):
+        follower_instance = Follower.objects.filter(follower_user=self).first()
+        if follower_instance:
+            return follower_instance.users_id.count()
+        return 0
+
 
 class Follower(models.Model):
     follower_user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_follower')
-    users_id = models.ManyToManyField(Account,)
+    users_id = models.ManyToManyField(Account, related_name='followers')
 
     def __str__(self):
-        return self.follower_user
+        return self.follower_user.username
+
+    def get_followers_count(self):
+        return self.users_id.count()
 
 
 class Following(models.Model):
     following_user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_following')
-    users_id = models.ManyToManyField(Account,)
+    users_id = models.ManyToManyField(Account, related_name='followings')
 
     def __str__(self):
-        return self.following_user
+        return self.following_user.username
 
+    def get_following_count(self):
+        return self.users_id.count()
 
 

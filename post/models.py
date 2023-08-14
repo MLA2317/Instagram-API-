@@ -24,7 +24,9 @@ class PostOtherAccount(models.Model):
 class Like(models.Model):
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='user_like')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
-    like = models.BooleanField(default=False)
+
+    # def __str__(self):
+    #     return f'{self.user_id.follower_set.count()} - {self.user_id.following_set.count()}'
 
 
 class Comment(models.Model):
@@ -40,5 +42,5 @@ class Comment(models.Model):
 class CommentLike(models.Model):
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='comment_liek_follower')
     comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    like = models.BooleanField(default=False)
+
 
