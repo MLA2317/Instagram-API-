@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from rest_framework import generics, serializers, status, permissions, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -73,15 +74,25 @@ class FollowingAPI(APIView):
 class FollowingRUD(APIView):
     serializers_class = FollowingListSerializer
 
-    def delete(self, request, pk, *args, **kwargs):
+    def delete(self, request, pk, users_id, *args, **kwargs):
         try:
-            instance = Following.objects.get(id=pk)
-            print(instance)
-        except Following.DoesNotExist:
-            return Response({"detail": "Following instance not found"}, status=status.HTTP_404_NOT_FOUND)
+            following_instance = Following.objects.get(following_user_id=pk)
+            print(following_instance)
 
-        instance.delete()
-        return Response({"detail": "Successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
+            # `users_id` many-to-many field dagi kerakli foydalanuvchini qidirish
+            user_to_unfollow = following_instance.users_id.filter(id=users_id).first()
+            print(user_to_unfollow)
+
+            if not user_to_unfollow:
+                return Response({"detail": "User not found in the following list of the specified following_user"},
+                                status=status.HTTP_404_NOT_FOUND)
+
+            following_instance.users_id.remove(user_to_unfollow)
+            return Response({"detail": "Unfollowed successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        except Following.DoesNotExist:
+            return Response({"detail": "Following record not found for the given following_user id"},
+                            status=status.HTTP_404_NOT_FOUND)
 
 
 class FollowingCreate(generics.CreateAPIView):
