@@ -72,7 +72,7 @@ class AllAccountsSerializer(serializers.ModelSerializer):
         'created_date')
 
 
-class FollowingSerializer(serializers.ModelSerializer):
+class FollowingListSerializer(serializers.ModelSerializer):
     users_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -80,25 +80,32 @@ class FollowingSerializer(serializers.ModelSerializer):
         fields = ('id', 'following_user', 'users_name')
 
     def get_users_name(self, obj):
-        return [user.username for user in obj.users_id.all()]
+        return [{'id': user.id, 'name': user.username} for user in obj.users_id.all()]
 
-    def validate(self, attrs):
-        following_user = attrs.get('following_user')
-        users = attrs.get('users_id', [])
-        print(users)
+    #
+    # def validate(self, attrs):
+    #     following_user = attrs.get('following_user')
+    #     users = attrs.get('users_id', [])
+    #     print(users)
+    #
+    #     # following_user o'zini o'ziga yozuvchiga aylantirishini taqiqlash:
+    #     if following_user in users:
+    #         raise serializers.ValidationError({
+    #             "users_id": "A user cannot follow themselves."
+    #         })
+    #
+    #     # users_id maydonida biror foydalanuvchini ikki marta kiritishni taqiqlash:
+    #     if len(users) != len(set(users)):
+    #         raise serializers.ValidationError({
+    #             "users_id": "Duplicated users are not allowed."
+    #         })
+    #     return attrs
 
-        # following_user o'zini o'ziga yozuvchiga aylantirishini taqiqlash:
-        if following_user in users:
-            raise serializers.ValidationError({
-                "users_id": "A user cannot follow themselves."
-            })
 
-        # users_id maydonida biror foydalanuvchini ikki marta kiritishni taqiqlash:
-        if len(users) != len(set(users)):
-            raise serializers.ValidationError({
-                "users_id": "Duplicated users are not allowed."
-            })
-        return attrs
+class FollowingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Following
+        fields = ('id', 'following_user', 'users_id')
 
 
 class FollowerSerializer(serializers.ModelSerializer):
