@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.urls import resolve
 
 from .forms import AccountRegisterForm, EditProfileForm
-from ..models import Account, Follower, Following
+from ..models import Account, Follow
 
 
 def register(request):

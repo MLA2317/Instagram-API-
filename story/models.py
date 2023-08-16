@@ -1,5 +1,5 @@
 from django.db import models
-from account.models import Account, Following, Follower
+from account.models import Account, Follow
 
 
 class Story(models.Model):
@@ -14,7 +14,7 @@ class Story(models.Model):
 
 class StoryMarkFollower(models.Model):
     story_id = models.ForeignKey(Story, on_delete=models.CASCADE)
-    mark = models.ManyToManyField(Following, blank=True)
+    mark = models.ManyToManyField(Follow, blank=True)
 
 
 

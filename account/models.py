@@ -73,41 +73,78 @@ class Account(AbstractUser, PermissionsMixin):
         else:
             return 'Image not found'
 
+    def follow(self, user):
+        """Follows a user."""
+        if user != self:
+            following_instance, created = Follow.objects.get_or_create(following=self)
+            following_instance.followers.add(user)
+
+    def unfollow(self, user):
+        """Unfollows a user."""
+        if user != self:
+            following_instance, created = Follow.objects.get_or_create(following=self)
+            following_instance.followers.remove(user)
+
     @property
     def following_count(self):
-        following_instance = Following.objects.filter(following_user=self).first()
-        if following_instance:
-            return following_instance.users_id.count()
-        return 0
+        try:  # 1-usul
+            following_instance = self.account_following.first()
+            if following_instance:
+                return following_instance.followers.count()
+            return 0
+        except AttributeError:
+            return 0
 
+        # try: # 2-usul
+        #     return self.account_following.aggregate(count=models.Count('followers'))['count']
+        # except AttributeError:
+        #     return 0
 
     @property
     def follower_count(self):
-        follower_instance = Follower.objects.filter(follower_user=self).first()
-        if follower_instance:
-            return follower_instance.users_id.count()
-        return 0
+        return self.followers.count()
 
 
-class Follower(models.Model):
-    follower_user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_follower')
-    users_id = models.ManyToManyField(Account, related_name='followers')
+class Follow(models.Model):
+    following = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_following')
+    followers = models.ManyToManyField(Account, related_name='followers')
 
     def __str__(self):
-        return self.follower_user.username
-
-    def get_followers_count(self):
-        return self.users_id.count()
+        return self.following.username
 
 
-class Following(models.Model):
-    following_user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_following')
-    users_id = models.ManyToManyField(Account, related_name='followings')
+    # def get_following_count(self):
+    #     return self.users_id.count()
 
-    def __str__(self):
-        return self.following_user.username
-
-    def get_following_count(self):
-        return self.users_id.count()
+    # def get_followers_count(self):
+    #     return self.users_id.count()
 
 
+
+    # def follow(self, user_to_follow):
+    #     if not Following.objects.filter(following_user=self, followed_user=user_to_follow).exists():
+    #         Following.objects.create(following_user=self, followed_user=user_to_follow)
+    #
+    # def unfollow(self, user_to_unfollow):
+    #     try:
+    #         follow_instance = Following.objects.get(following_user=self, followed_user=user_to_unfollow)
+    #         follow_instance.delete()
+    #     except Following.DoesNotExist:
+    #         pass
+
+
+
+    # @property
+    # def following_count(self):
+    #     following_instance = Following.objects.filter(following_user=self).first()
+    #     if following_instance:
+    #         return following_instance.users_id.count()
+    #     return 0
+    #
+    #
+    # @property
+    # def follower_count(self):
+    #     follower_instance = Follower.objects.filter(follower_user=self).first()
+    #     if follower_instance:
+    #         return follower_instance.users_id.count()
+    #     return 0

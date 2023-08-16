@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterAPI, LoginAPI, ProfileList, FollowingAPI, FollowingRUD, FollowerViewSet, AllAccountApi, FollowingCreate
+from .views import RegisterAPI, LoginAPI, ProfileList, FollowingList, FollowRUD, AllAccountApi, FollowCreate, FollowerList
 from rest_framework.routers import DefaultRouter
 
 # router = DefaultRouter()
@@ -14,10 +14,10 @@ urlpatterns = [
 
     path('all_accounts/', AllAccountApi.as_view()),
     path('profile/', ProfileList.as_view()),
-    path('followings/list/', FollowingAPI.as_view()),
-    path('followings/unfollow/<int:pk>/users/<int:users_id>/', FollowingRUD.as_view()),
-    path('followings/create/', FollowingCreate.as_view()),
-    path('followers/list/', FollowerViewSet.as_view()),
+    path('following/list/', FollowingList.as_view()),
+    path('following/unfollow/<int:pk>/users/<int:followers>/', FollowRUD.as_view()),
+    path('following/create/', FollowCreate.as_view()),
+    path('account/<int:account_id>/followers/list/', FollowerList.as_view()),
 
     # v1
     path('v1/', include('account.v1.urls'))
