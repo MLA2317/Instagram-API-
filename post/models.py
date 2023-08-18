@@ -13,12 +13,12 @@ class Post(models.Model):
     update_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user_id.username} - post'
+        return f'post of {self.user_id.username}'
 
 
 class PostOtherAccount(models.Model):
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True, related_name='other_account_post')
-    users_id = models.ManyToManyField(Follow,)
+    users_id = models.ManyToManyField(Account,)
 
 
 class Like(models.Model):

@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializer import RegisterSerializer, LoginSerializer, LocationSerializer, ProfilesSerializer, \
-    FollowingListSerializer, FollowCreateSerializer, FollowerListSerializer, AllAccountsSerializer
+    FollowingListSerializer, FollowCreateSerializer, FollowerSerializer
 from .models import Account, Location, Follow
 
 
@@ -49,7 +49,7 @@ class ProfileList(generics.ListAPIView):
 
 class AllAccountApi(generics.ListAPIView):
     queryset = Account.objects.all()
-    serializer_class = AllAccountsSerializer
+    serializer_class = ProfilesSerializer
     permissions = IsAuthenticated
 
 
@@ -113,7 +113,7 @@ class FollowCreate(generics.CreateAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
             # Check if you're already following these users
-        already_following = Follow.objects.filter(following_id=following, followers__in=followers)
+        already_following = Follow.objects.filter(following_id=following.id, followers__in=followers)
         if already_following.exists():
             return Response({'success': False, 'message': 'You already follow one or more of these users'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -132,69 +132,18 @@ class FollowCreate(generics.CreateAPIView):
         return Response({'success': True, 'message': 'Successfully followed the user(s)', 'data': serializer.data},
                         status=status.HTTP_201_CREATED)
 
-class FollowerList(APIView):
+
+class FollowerList(APIView): # not working
     def get(self, request, account_id):
-
         try:
-            # Fetch the Account with the given ID
             account = Account.objects.get(id=account_id)
-            followers_id = account.followers.all()
-            # Serialize the account using FollowerListSerializer
-            serializer = FollowerListSerializer(followers_id)
-
+            # Assuming account has a related Follow instance
+            follow_instance = account.followers.all()
+            print(follow_instance)
+            serializer = FollowerSerializer(follow_instance)
+            print(serializer)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
         except Account.DoesNotExist:
             return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
-    # def get(self, request, account_id):
-    #
-    #     try:
-    #         # Fetch the Account with the given ID
-    #         account = Account.objects.get(id=account_id)
-    #         follower = account.followers.all()
-    #         print('f', 'f', follower)
-    #         # Serialize the account using FollowerListSerializer, which will list its followers
-    #         serializer = FollowerListSerializer(follower, many=True)
-    #         #print(serializer)
-    #
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #     except Account.DoesNotExist:
-    #         return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
-    # def get(self, request, account_id):
-    #     try:
-    #         # Fetch the Follow instance for the given Account ID
-    #         follow_instance = Follow.objects.get(following_id=account_id)
-    #
-    #         # Serialize the Follow instance, which will list its followers
-    #         serializer = FollowerListSerializer(follow_instance)
-    #
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #     except Follow.DoesNotExist:
-    #         return Response({"detail": "Follow instance not found for this account."}, status=status.HTTP_404_NOT_FOUND)
-    #     except Account.DoesNotExist:
-    #         return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # try:
-        #     # Fetch the Account with the given ID
-        #     account = Account.objects.get(id=account_id)
-        #     print('account', account)
-        #
-        #     # Fetch the Follow instance related to the account
-        #     follow_instance = Follow.objects.get(following=account)
-        #     print(follow_instance)
-        #
-        #     # Serialize the Follow instance using FollowerListSerializer
-        #     serializer = FollowerListSerializer(follow_instance)
-        #
-        #     return Response(serializer.data, status=status.HTTP_200_OK)
-        #
-        # except Account.DoesNotExist:
-        #     return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
-        # except Follow.DoesNotExist:
-        #     return Response({"detail": "This account doesn't have any followers."}, status=status.HTTP_404_NOT_FOUND)
 
 

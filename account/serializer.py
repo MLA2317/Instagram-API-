@@ -64,13 +64,6 @@ class ProfilesSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count', 'created_date')
 
 
-class AllAccountsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = ('id', 'username', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count',
-        'created_date')
-
-
 class FollowingListSerializer(serializers.ModelSerializer):
     users_name = serializers.SerializerMethodField()
 
@@ -80,38 +73,6 @@ class FollowingListSerializer(serializers.ModelSerializer):
 
     def get_users_name(self, obj):
         return [{'id': user.id, 'name': user.username} for user in obj.followers.all()]
-
-
-class AccountListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = ('id', 'username')
-
-
-class FollowerListSerializer(serializers.ModelSerializer):
-    followers_id = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Account
-        fields = ('followers_id',)
-
-    def get_followers_id(self, obj):
-        # Fetch related Follow instance using related_name
-        try:
-            follow_instance = obj.account_following.first()
-            if follow_instance:
-                return [follower.id for follower in follow_instance.followers.all()]
-            return []
-        except AttributeError:
-            return []
-
-    # class Meta:
-    #     model = Account
-    #     fields = ('followers',)
-    #
-    # def get_followers(self, obj):
-    #     # Serialize each follower and return the list
-    #     return AccountListSerializer(obj.followers.all()).data
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
@@ -127,44 +88,19 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'following', 'followers')
 
 
-# class FollowerSerializer(serializers.ModelSerializer):
-#     users_name = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Follower
-#         fields = ('id', 'follower_user', 'users_name')
-#
-#     def get_users_name(self, obj):
-#         return [user.username for user in obj.users_id.all()]
-#
-#     def validate(self, attrs):
-#         follower_user = attrs.get('follower_user')
-#         users = attrs.get('users_id', [])
-#
-#         # follower_user o'zini o'ziga yozuvchiga aylanmasligini taqiqlash:
-#         if follower_user in users:
-#             raise serializers.ValidationError({
-#                 "users_id": "A user cannot follow themselves."
-#             })
-#
-#         return attrs
+class AccountListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ('id', 'username')
 
 
-#
-    # def validate(self, attrs):
-    #     following_user = attrs.get('following_user')
-    #     users = attrs.get('users_id', [])
-    #     print(users)
-    #
-    #     # following_user o'zini o'ziga yozuvchiga aylantirishini taqiqlash:
-    #     if following_user in users:
-    #         raise serializers.ValidationError({
-    #             "users_id": "A user cannot follow themselves."
-    #         })
-    #
-    #     # users_id maydonida biror foydalanuvchini ikki marta kiritishni taqiqlash:
-    #     if len(users) != len(set(users)):
-    #         raise serializers.ValidationError({
-    #             "users_id": "Duplicated users are not allowed."
-    #         })
-    #     return attrs
+class FollowerSerializer(serializers.ModelSerializer):
+    followers = AccountListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ('followers', )
+
+    # def get_followers(self, obj):
+    #     return obj.followers.all
+

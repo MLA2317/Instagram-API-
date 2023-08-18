@@ -73,17 +73,17 @@ class Account(AbstractUser, PermissionsMixin):
         else:
             return 'Image not found'
 
-    def follow(self, user):
-        """Follows a user."""
-        if user != self:
-            following_instance, created = Follow.objects.get_or_create(following=self)
-            following_instance.followers.add(user)
-
-    def unfollow(self, user):
-        """Unfollows a user."""
-        if user != self:
-            following_instance, created = Follow.objects.get_or_create(following=self)
-            following_instance.followers.remove(user)
+    # def follow(self, user):
+    #     """Follows a user."""
+    #     if user != self:
+    #         following_instance, created = Follow.objects.get_or_create(following=self)
+    #         following_instance.followers.add(user)
+    #
+    # def unfollow(self, user):
+    #     """Unfollows a user."""
+    #     if user != self:
+    #         following_instance, created = Follow.objects.get_or_create(following=self)
+    #         following_instance.followers.remove(user)
 
     @property
     def following_count(self):
