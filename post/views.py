@@ -38,7 +38,6 @@ class LikePostApi(generics.CreateAPIView): # done
         post_id = self.kwargs.get('post_id')
         user_id = request.user
         print(user_id)
-        print(user_id)
         try:
             post_id = Post.objects.get(pk=post_id)
         except Post.DoesNotExist:

@@ -25,8 +25,8 @@ class Like(models.Model):
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='user_like')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
 
-    # def __str__(self):
-    #     return f'{self.user_id.follower_set.count()} - {self.user_id.following_set.count()}'
+    def __str__(self):
+        return f'{self.id} || {self.user_id} - {self.post_id}'
 
 
 class Comment(models.Model):
