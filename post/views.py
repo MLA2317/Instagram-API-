@@ -50,3 +50,21 @@ class LikePostApi(generics.CreateAPIView): # done
         serializer = LikePostSerializer(instance)
         return Response(serializer.data)
 
+
+class CommentListCreateApiView(generics.ListCreateAPIView):
+    # http://127.0.0.0.8000/blog/api/{post_id}/comment-list-create/
+    queryset = Comment.objects.filter(parent_comment__isnull=True) # commentni otasi bolish kerak emas
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['post_id'] = self.kwargs.get('post_id')
+        return ctx
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        post_id = self.kwargs.get('post_id')
+        qs = qs.filter(post_id=post_id)
+        return qs
+    

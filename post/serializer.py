@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Post, PostOtherAccount, Like, Comment, CommentLike
-from account.serializer import AccountListSerializer
+from account.serializer import ProfilesSerializer, AccountListSerializer
 
 
 class LikeGetSerializer(serializers.ModelSerializer): # done
@@ -24,15 +24,36 @@ class LikePostSerializer(serializers.ModelSerializer): # done
         }
 
 
+class MiniCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'user_id', 'post_id', 'parent_comment', 'message', 'top_level_comment_id', 'created_date')
+
+
 class CommentSerializer(serializers.ModelSerializer):
-    user_id = AccountListSerializer(read_only=True)
+    user_id = ProfilesSerializer(read_only=True)
+    children = serializers.SerializerMethodField(read_only=True)
+
+    def get_children(self, obj):
+        children = Comment.objects.filter(parent_comment_id=obj.id)
+        serializer = MiniCommentSerializer(children, many=True)
+        return serializer.data
 
     class Meta:
         model = Comment
-        fields = ('id', 'user_id', 'post_id', 'message', 'created_date')
+        fields = ('id', 'user_id', 'post_id',  'parent_comment', 'message',  'top_level_comment_id', 'children', 'created_date')
         extra_kwargs = {
-            'author': {'read_only': True}
+            'user_id': {'read_only': True},
+            'post_id': {'read_only': True},
+            'top_level_comment_id': {'read_only': True}
         }
+
+    def create(self, validated_data):
+        request = self.context['request']
+        post_id = self.context['post_id']
+        user_id = request.user.id
+        instance = Comment.objects.create(user_id=user_id, post_id=post_id,**validated_data)
+        return instance
 
 
 class CommentLikeSerializer(serializers.ModelSerializer):
