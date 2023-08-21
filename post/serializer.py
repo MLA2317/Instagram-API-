@@ -24,7 +24,7 @@ class LikePostSerializer(serializers.ModelSerializer): # done
         }
 
 
-class MiniCommentSerializer(serializers.ModelSerializer):
+class MiniCommentSerializer(serializers.ModelSerializer): # Done
     class Meta:
         model = Comment
         fields = ('id', 'user_id', 'post_id', 'parent_comment', 'message', 'top_level_comment_id', 'created_date')
@@ -48,18 +48,22 @@ class CommentSerializer(serializers.ModelSerializer):
             'top_level_comment_id': {'read_only': True}
         }
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # done
         request = self.context['request']
         post_id = self.context['post_id']
         user_id = request.user.id
-        instance = Comment.objects.create(user_id=user_id, post_id=post_id,**validated_data)
+        instance = Comment.objects.create(user_id=user_id, post_id=post_id, **validated_data)
         return instance
 
 
-class CommentLikeSerializer(serializers.ModelSerializer):
+class CommentLikeSerializer(serializers.ModelSerializer): #done
     class Meta:
         model = CommentLike
-        fields = ('id', 'user_id', 'comment_id')
+        fields = ('comment_id',)
+        extra_kwargs = {
+            'user_id': {'required': False},
+            'comment_id': {'required': False}
+        }
 
 
 class PostSerializer(serializers.ModelSerializer):
