@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Post, PostOtherAccount, Like, Comment, CommentLike
 from account.serializer import ProfilesSerializer, AccountListSerializer
+from account.models import Account
 
 
 class LikeGetSerializer(serializers.ModelSerializer): # done
@@ -66,7 +67,7 @@ class CommentLikeSerializer(serializers.ModelSerializer): #done
         }
 
 
-class PostDetailSerializer(serializers.ModelSerializer):
+class PostDetailSerializer(serializers.ModelSerializer): # Done
     likes_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
 
@@ -82,13 +83,25 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return Comment.objects.filter(post_id=obj.id).count()
 
 
-class PostSerializer(serializers.ModelSerializer):
+class PostSerializer(serializers.ModelSerializer): # Done
     class Meta:
         model = Post
         fields = ('id', 'user_id', 'image', 'location', 'description', 'archive', 'send')
 
 
 class PostOtherAccountSerializer(serializers.ModelSerializer):
+    users_id = AccountListSerializer(many=True)
+
     class Meta:
         model = PostOtherAccount
         fields = ('id', 'post_id', 'users_id')
+
+    def create(self, validated_data):
+        users_data = validated_data.pop('users_id')
+        post_other_account = PostOtherAccount.objects.create(**validated_data)
+        print(post_other_account)
+        for user_data in users_data:
+            account, created = Account.objects.get_or_create(**user_data)
+            post_other_account.users_id.add(account)
+            print('pp', post_other_account)
+        return post_other_account

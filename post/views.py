@@ -137,3 +137,13 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({'detail': "Not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class PostOtherAccountAPi(viewsets.ModelViewSet):
+    queryset = PostOtherAccount.objects.all()
+    serializer_class = PostOtherAccountSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        post_other_account = self.get_object()
+        serializer = PostOtherAccountSerializer(post_other_account)
+        return Response(serializer.data)
