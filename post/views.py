@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .serializer import PostSerializer, PostGetSerializer, PostOtherAccountSerializer, CommentSerializer, \
+from .serializer import PostSerializer, PostDetailSerializer, PostOtherAccountSerializer, CommentSerializer, \
     LikeGetSerializer, LikePostSerializer, CommentLikeSerializer
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -51,8 +51,8 @@ class LikePostApi(generics.CreateAPIView): # done
         return Response(serializer.data)
 
 
-class CommentListCreateApiView(generics.ListCreateAPIView):
-    queryset = Comment.objects.filter(parent_comment__isnull=True) # commentni otasi bolish kerak emas
+class CommentListCreateApiView(generics.ListCreateAPIView): # Done
+    queryset = Comment.objects.filter(parent_comment__isnull=True)
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -68,7 +68,7 @@ class CommentListCreateApiView(generics.ListCreateAPIView):
         return qs
 
 
-class CommentDeleteApiView(APIView):
+class CommentDeleteApiView(APIView): # Done
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -84,7 +84,6 @@ class CommentDeleteApiView(APIView):
         if comment is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        # Optional: Check if the request user is the owner of the comment before deleting
         if comment.user_id != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -93,7 +92,7 @@ class CommentDeleteApiView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CommentLikeCreateAPi(generics.CreateAPIView):
+class CommentLikeCreateAPi(generics.CreateAPIView): # Done
     queryset = CommentLike.objects.all()
     serializer_class = CommentLikeSerializer
 
@@ -119,3 +118,22 @@ class CommentLikeCreateAPi(generics.CreateAPIView):
         serializer = CommentLikeSerializer(instance)
         return Response(serializer.data)
 
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+
+    # for user.id belong to posts
+    def get_queryset(self):
+        return Post.objects.filter(user_id=self.request.user.id)
+
+    def get_serializer_class(self):
+        if self.action in ['create']:
+            return PostSerializer
+        return PostDetailSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user_id != request.user.id:
+            return Response({'detail': "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

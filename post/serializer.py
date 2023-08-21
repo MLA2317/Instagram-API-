@@ -30,8 +30,8 @@ class MiniCommentSerializer(serializers.ModelSerializer): # Done
         fields = ('id', 'user_id', 'post_id', 'parent_comment', 'message', 'top_level_comment_id', 'created_date')
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    user_id = ProfilesSerializer(read_only=True)
+class CommentSerializer(serializers.ModelSerializer): # Done
+    #user_id = ProfilesSerializer(read_only=True)
     children = serializers.SerializerMethodField(read_only=True)
 
     def get_children(self, obj):
@@ -50,9 +50,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):  # done
         request = self.context['request']
-        post_id = self.context['post_id']
-        user_id = request.user.id
-        instance = Comment.objects.create(user_id=user_id, post_id=post_id, **validated_data)
+        post = Post.objects.get(id=self.context['post_id'])
+        user = request.user
+        instance = Comment.objects.create(user_id=user, post_id=post, **validated_data)
         return instance
 
 
@@ -66,23 +66,26 @@ class CommentLikeSerializer(serializers.ModelSerializer): #done
         }
 
 
+class PostDetailSerializer(serializers.ModelSerializer):
+    likes_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = ('id', 'user_id', 'image', 'location', 'description', 'archive', 'send', 'likes_count', 'comment_count',
+                  'created_date', 'update_date')
+
+    def get_likes_count(self, obj):
+        return Like.objects.filter(post_id=obj.id).count()
+
+    def get_comment_count(self, obj):
+        return Comment.objects.filter(post_id=obj.id).count()
+
+
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('id', 'user_id', 'image', 'location', 'description', 'archieve', 'send', 'created_date', 'modified_date')
-
-
-class PostGetSerializer(serializers.ModelSerializer):
-    like = LikeGetSerializer(many=True, read_only=True)
-    like_count = serializers.SerializerMethodField("get_likes_count")
-    comment = CommentSerializer(many=True, read_only=True)
-    comment_count = serializers.SerializerMethodField('get_comment_count')
-    user_id = AccountListSerializer(read_only=True)
-    comment_like = CommentLikeSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Post
-        fields = ('id', 'user_id', 'image', 'location', 'description', 'like', 'like_count', 'comment', 'comment_count', 'comment_like')
+        fields = ('id', 'user_id', 'image', 'location', 'description', 'archive', 'send')
 
 
 class PostOtherAccountSerializer(serializers.ModelSerializer):

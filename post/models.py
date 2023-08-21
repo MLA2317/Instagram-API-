@@ -22,6 +22,11 @@ class PostOtherAccount(models.Model):
     users_id = models.ManyToManyField(Account,)
 
 
+# class SendPost(models.Model):
+#     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
+#     send = models.ForeignKey(Follow, on_delete=models.CASCADE, null=True, blank=True)
+
+
 class Like(models.Model):
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='user_like')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
