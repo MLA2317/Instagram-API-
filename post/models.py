@@ -33,7 +33,7 @@ class Like(models.Model):
 class Comment(models.Model):
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='follow_comment')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
-    parent_comment = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='comments')
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
     message = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
     top_level_comment_id = models.IntegerField(null=True, blank=True)

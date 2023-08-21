@@ -68,6 +68,31 @@ class CommentListCreateApiView(generics.ListCreateAPIView):
         return qs
 
 
+class CommentDeleteApiView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_object(self, pk):
+        try:
+            return Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            return None
+
+    def delete(self, request, pk, *args, **kwargs):
+        comment = self.get_object(pk)
+        print(comment)
+
+        if comment is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # Optional: Check if the request user is the owner of the comment before deleting
+        if comment.user_id != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        comment.delete()
+        print('delete', comment)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class CommentLikeCreateAPi(generics.CreateAPIView):
     queryset = CommentLike.objects.all()
     serializer_class = CommentLikeSerializer

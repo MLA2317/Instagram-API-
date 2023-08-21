@@ -84,14 +84,6 @@ class PostGetSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'user_id', 'image', 'location', 'description', 'like', 'like_count', 'comment', 'comment_count', 'comment_like')
 
-    @staticmethod
-    def get_likes_count(obj):
-        return obj.like.count()
-
-    @staticmethod
-    def get_comment_count(obj):
-        return obj.comment.count()
-
 
 class PostOtherAccountSerializer(serializers.ModelSerializer):
     class Meta:
