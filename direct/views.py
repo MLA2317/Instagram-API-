@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializer import DirectMessageSerializer
+from .serializer import DirectGETMessageSerializer, DirectPostMessageSerializer
 from .models import DirectMessage
 from rest_framework.response import Response
 from rest_framework import status, views, generics
@@ -7,7 +7,7 @@ from rest_framework import status, views, generics
 
 class SendMessageView(generics.CreateAPIView):
     queryset = DirectMessage.objects.all()
-    serializer_class = DirectMessageSerializer
+    serializer_class = DirectPostMessageSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
@@ -21,7 +21,7 @@ class SendMessageView(generics.CreateAPIView):
 
 
 class ListReceivedMessageView(generics.ListAPIView):
-    serializer_class = DirectMessageSerializer
+    serializer_class = DirectGETMessageSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -29,7 +29,7 @@ class ListReceivedMessageView(generics.ListAPIView):
 
 
 class ListSendMessageView(generics.ListAPIView):
-    serializer_class = DirectMessageSerializer
+    serializer_class = DirectGETMessageSerializer
 
     def get_queryset(self):
         user = self.request.user
