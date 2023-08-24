@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'post',
     'save',
     'story',
+    'notification',
 ]
 
 MIDDLEWARE = [

@@ -14,4 +14,7 @@ urlpatterns = [
     path('<int:pk>/comment/delete/', CommentDeleteApiView.as_view()),
     path('comment-like/create/<int:comment_id>/', CommentLikeCreateAPi.as_view()),
     path('', include(router.urls)),
+
+    #v1
+    path('v1/', include('post.v1.urls'))
 ]
