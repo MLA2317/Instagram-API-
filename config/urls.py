@@ -45,7 +45,8 @@ urlpatterns = [
     path('direct/', include('direct.urls')),
     path('post/', include('post.urls')),
     path('save/', include('save.urls')),
-    path('story/', include('story.urls'))
+    path('story/', include('story.urls')),
+    path('notification/', include('notification.urls'))
 
 ]
 
