@@ -66,13 +66,20 @@ class ProfilesSerializer(serializers.ModelSerializer):
 
 class FollowingListSerializer(serializers.ModelSerializer):
     users_name = serializers.SerializerMethodField()
+    is_following_back = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
-        fields = ('id', 'following', 'users_name')
+        fields = ('id', 'following', 'users_name', 'is_following_back')
 
     def get_users_name(self, obj):
-        return [{'id': user.id, 'name': user.username} for user in obj.followers.all()]
+        return {
+            'id': obj.followers.id,
+            'name': obj.followers.username
+        }
+
+    def get_is_following_back(self, obj):
+        return Follow.objects.filter(following=obj.followers, followers=obj.following).exists()
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
@@ -95,12 +102,12 @@ class AccountListSerializer(serializers.ModelSerializer):
 
 
 class FollowerSerializer(serializers.ModelSerializer):
-    followers = AccountListSerializer(many=True, read_only=True)
+    user_name_following = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
-        fields = ('followers', )
+        fields = ('id', 'user_name_following', 'followers')
 
-    # def get_followers(self, obj):
-    #     return obj.followers.all
+    def get_user_name_following(self, obj):
+        return obj.following.username
 

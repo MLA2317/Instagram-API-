@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+
+        <!-- Metadata -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="author" content="George W. Park">
+        <meta name="description"
+              content="This project demonstrates how CSS grid (with flexbox and float fallback) can be used to re-create the layout of an Instagram profile page.">
+
+        <!-- Title -->
+        <title>Instagram Profile Layout</title>
+
+        <!-- External CSS Files -->
+        <link rel="stylesheet" href="{% static 'assets3/css/reset.css' %}">
+        <link rel="stylesheet" href="{% static 'assets3/css/styles.css' %}">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+
+    </head>
+    <body>
+
+    <header>
+        <br><br><br>
+        <div class="container">
+
+            <div class="profile">
+
+                <div class="profile-image">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="" style="width: 200px; height: 200px;">
+                    {% else %}
+                        <!-- Optionally, provide a default image or some placeholder -->
+                        <img src="{% static 'user (1).png' %}" alt=""
+                             style="width: 200px; height: 200px;">
+                    {% endif %}
+
+                </div>
+
+                <div class="profile-first_name">
+                    {% if profile.first_name %}
+                        <h6 class="profile-user-name">{{ profile.first_name }}</h6> <br>
+                    {% endif %}
+                    <h5 style="font-size: 15px;" class="profile-user-name">@{{ profile.username }}</h5>
+
+                    {% if request.user.is_authenticated and request.user == profile %}
+                        <a style="text-decoration: none;" href="{% url 'account:editprofile' %}"
+                           class="btn profile-edit-btn">Edit Profile</a>
+                        <a style="text-decoration: none;" href="{% url  'account:sign-out' %}"
+                           class="btn profile-edit-btn">Logout</a>
+                        <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
+                                                                                                  aria-hidden="true"></i>
+                        </button>
+
+
+                    {% endif %}
+                    <br><br>
+                    {% if request.user.is_authenticated and request.user != profile %}
+                        {% if follow_status == True %}
+                            <a href="{% url 'account:follow' profile.username 0 %}" class="btn profile-edit-btn" style="color: red;">Unfollow</a> <br><br>
+                        {% else %}
+                            <a href="{% url 'account:follow' profile.username 1 %}" class="btn profile-edit-btn" style="color: blue;">Follow</a> <br><br>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if request.user.is_authenticated and request.user != profile %}
+                        <a href="{% url 'direct:conversation' profile.username %}" class="btn profile-edit-btn">Message</a> <br><br>
+                    {% endif %}
+                    <br>
+
+
+                </div>
+
+
+                <div class="profile-bio">
+                    <br>
+                    {% if profile.bio %}
+                        <p><span class="profile-real-name"></span>◉ {{ profile.bio }}</p>
+                    {% endif %}
+                    {% if profile.location %}
+                        <p><span class="profile-real-name"></span>◉ {{ profile.location }}</p>
+                    {% endif %}
+                    {% if profile.phone_number %}
+                        <p><span class="profile-real-name"></span>◉ {{ profile.phone_number }}</p>
+                    {% endif %}
+                    <br><br>
+                    <div class="profile-user-settings">
+                        <a href="{% url 'account:profile' profile.username %}" class="btns profiele-edit-btn">Posts</a>
+
+                        <a href="{% url 'account:profile' profile.username %}?view=saved"
+                           class="btns profiele-edit-btn">Saved</a>
+
+                    </div>
+                </div>
+
+
+                <div class="profile-stats">
+
+                    <ul>
+                        <li><span class="profile-stat-count">{{ posts_count }}</span> posts</li>
+                        <li>
+                            <button data-bs-toggle="modal" data-bs-target="#exampleModal1"
+                                    class="profile-stat-count">{{ followers_count }} followers
+                            </button>
+                        </li>
+                        <li>
+                            <button data-bs-toggle="modal" data-bs-target="#exampleModal2"
+                                    class="profile-stat-count">{{ following_count }} following
+                            </button>
+                        </li>
+                    </ul>
+                    <br>
+                    <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel1"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel1">followers</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {% for follower in followers %}
+                                        <div style="display: flex; margin: 10px 0; align-items: center; align-self: center; justify-content: space-between">
+                                            {% if follower.avatar %}
+                                                <img style="width: 50px; height: 50px; border-radius: 50%"
+                                                     src="{{ follower.avatar.url }}" class="avatar">
+                                                <p>
+                                                    <a style="font-size: 16px; font-family: Arial; font-weight: 700;  text-decoration: none; color: #000"
+                                                       href="{% url 'account:profile' follower.username %}">{{ follower.username }}</a>
+                                                </p>
+                                                <button style="padding: 10px;border: 1px solid #232160; border-radius: 5px; background: #fff; color: #2b2b9d">
+                                                    {% if request.user.is_authenticated and request.user != follower %}
+                                                        {% if follow_status == True %}
+                                                            <a href="{% url 'account:follow' follower.username 0 %}"
+                                                               class="btn profile-edit-btn"
+                                                               style="color: red;">Unfollow</a> <br><br>
+                                                        {% else %}
+                                                            <a href="{% url 'account:follow' follower.username 1 %}"
+                                                               class="btn profile-edit-btn"
+                                                               style="color: blue;">Follow</a> <br><br>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </button>
+                                            {% else %}
+                                                <img style="width: 50px; height: 50px; border-radius: 50%"
+                                                     src="{% static 'user (1).png' %}" class="avatar">
+                                                <p>
+                                                    <a style="font-size: 16px; font-family: Arial; font-weight: 700;  text-decoration: none; color: #000"
+                                                       href="{% url 'account:profile' follower.username %}">{{ follower.username }}</a>
+                                                </p>
+                                                <button style="padding: 10px;border: 1px solid #232160; border-radius: 5px; background: #fff; color: #2b2b9d">
+                                                    Follower
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel2">followings</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {% for user in followings %}
+                                        <div style="display: flex; margin: 10px 0; align-items: center; align-self: center; justify-content: space-between">
+                                            {% if user.avatar %}
+                                                <img style="width: 50px; height: 50px; border-radius: 50%"
+                                                     src="{{ user.avatar.url }}" class="avatar">
+                                                <p>
+                                                    <a style="font-size: 16px; font-family: Arial; font-weight: 700;  text-decoration: none; color: #000"
+                                                       href="{% url 'account:profile' user.username %}">{{ user.username }}</a>
+                                                </p>
+                                                <button style="padding: 10px;border: 1px solid red; border-radius: 5px; background: #fff; color: red">
+                                                    {% if request.user.is_authenticated and request.user != user %}
+                                                        {% if follow_status == True %}
+                                                            <a href="{% url 'account:follow' user.username 0 %}"
+                                                               class="btn profile-edit-btn"
+                                                               style="color: red;">Unfollow</a> <br><br>
+                                                        {% else %}
+                                                            <a href="{% url 'account:follow' user.username 1 %}"
+                                                               class="btn profile-edit-btn"
+                                                               style="color: blue;">Follow</a> <br><br>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </button>
+                                            {% else %}
+                                                <img style="width: 50px; height: 50px; border-radius: 50%"
+                                                     src="{% static 'user (1).png' %}" class="avatar">
+                                                <p>
+                                                    <a style="font-size: 16px; font-family: Arial; font-weight: 700;  text-decoration: none; color: #000"
+                                                       href="{% url 'account:profile' user.username %}">{{ user.username }}</a>
+                                                </p>
+                                                <button style="padding: 10px;border: 1px solid red; border-radius: 5px; background: #fff; color: red">
+                                                    Unfollow
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- End of profile section -->
+                </div>
+            </div>
+        </div>
+        <!-- End of container -->
+    </header>
+
+    <main>
+
+        <div class="container">
+
+            <div class="gallery">
+
+{#                {% if request.user == profile %}#}
+                    {% if view == 'saved' %}
+                        {% for save in saves %}
+
+                                <a href="{% url 'post:detail' save.id %}">
+
+                                    <div class="gallery-item" tabindex="0">
+                                        {% if save.image %}
+                                            {% with file_ext=save.image.url|lower|slice:"-4:" %}
+                                                {% if file_ext in ".mp4,.webm,.ogg,.mov" %}
+                                                    <video style="width: 400px; height: 300px" controls>
+                                                        <source src="{{ save.image.url }}" type="video/mp4">
+                                                    </video>
+                                                {% elif file_ext in ".jpg,.jpeg,.png,.gif" %}
+                                                    <img src="{{ save.image.url }}" alt="Saved Post Image"
+                                                         style="width: 400px; height: 300px">
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </div>
+                                </a>
+
+                        {% endfor %}
+                    {% elif view == 'posts' %}
+                        {% for post in posts %}
+                            <a href="{% url 'post:detail' post.id %}">
+                                <div class="gallery-item" tabindex="0">
+                                    {% if post.image %}
+                                        {% with file_ext=post.image.url|lower|slice:"-4:" %}
+                                            {% if file_ext in ".mp4,.webm,.ogg,.mov" %}
+                                                <video style="width: 100%; height: 300px" controls>
+                                                    <source src="{{ post.image.url }}" type="video/mp4">
+                                                </video>
+                                            {% elif file_ext in ".jpg,.jpeg,.png,.gif" %}
+                                                <img src="{{ post.image.url }}" alt="Post Image"
+                                                     style="width: 100%; height: 300px">
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                    <div class="gallery-item-info">
+                                        <ul>
+                                            <li class="gallery-item-likes"><i class="fas fa-heart"
+                                                                              aria-hidden="true"></i> {{ post.likes_count }}
+                                            </li>
+                                            <li class="gallery-item-comments"><i class="fas fa-comment"
+                                                                                 aria-hidden="true"></i> {{ post.comment_count }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+{#                {% endif %}#}
+
+            </div>
+
+            <!-- End of gallery -->
+
+
+        </div>
+        <!-- End of container -->
+
+    </main>
+{% endblock content %}
+{##}
+{#<script>#}
+{#document.addEventListener("DOMContentLoaded", function() {#}
+{#    const followBtn = document.querySelector('.follow-btn');#}
+{##}
+{#    followBtn.addEventListener('click', function() {#}
+{#        const username = "{{ profile.username }}";#}
+{#        const csrftoken = "{{ csrf_token }}"; // CSRF token for Django POST requests#}
+{##}
+{#        let url;#}
+{#        if (followBtn.textContent.trim() === "Follow") {#}
+{#            url = `{% url 'follow_user' username %}`;#}
+{#        } else {#}
+{#            url = `{% url 'unfollow_user' username %}`;#}
+{#        }#}
+{##}
+{#        fetch(url, {#}
+{#            method: 'POST',#}
+{#            headers: {#}
+{#                'X-CSRFToken': csrftoken#}
+{#            },#}
+{#        })#}
+{#        .then(response => response.json())#}
+{#        .then(data => {#}
+{#            if (data.success) {#}
+{#                if (followBtn.textContent.trim() === "Follow") {#}
+{#                    followBtn.textContent = "Unfollow";#}
+{#                    followBtn.style.color = "red";#}
+{#                } else {#}
+{#                    followBtn.textContent = "Follow";#}
+{#                    followBtn.style.color = "green";#}
+{#                }#}
+{#            } else {#}
+{#                console.error("An error occurred");#}
+{#            }#}
+{#        });#}
+{#    });#}
+{##}
+{#</script>#}

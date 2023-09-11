@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,11 +42,11 @@ INSTALLED_APPS = [
     # 'redis',
     # 'django_celery_results',
     'rest_framework',
+    #'crispy_forms'  # bu formalarni chiroyli qilib beradi
     'drf_yasg',
     'account',
     'direct',
     'post',
-    'save',
     'story',
     'notification.apps.NotificationConfig',
 ]
@@ -143,10 +143,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-#
-# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
-# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Tashkent'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+#     'PAGE_SIZE': 5
+# }
+
+# CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/'
+CELERY_BEAT_SCHEDULE = {
+    'archive_stories_every_hour': {
+        'task': 'stories.tasks.archive_expired_stories',
+        'schedule': timedelta(hours=1),
+    },
+}
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tashkent'

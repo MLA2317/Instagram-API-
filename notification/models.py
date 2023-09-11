@@ -1,5 +1,8 @@
 from django.db import models
-from account.models import Account
+from django.db.models.signals import post_save, pre_delete, post_delete
+from django.dispatch import receiver
+
+from account.models import Account, Follow
 
 
 class Notification(models.Model):
@@ -16,5 +19,40 @@ class Notification(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     is_seen = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.post
+
+@receiver(post_save, sender=Follow)
+def user_follow(sender, instance, created, **kwargs):
+    if created:
+        followers = instance.followers
+        following = instance.following
+        notify = Notification(sender=followers, user=following, notification_type=2)
+        notify.save()
+
+
+@receiver(pre_delete, sender=Follow)
+def user_unfollow(sender, instance, **kwargs):
+    followers = instance.followers
+    following = instance.following
+    notify = Notification.objects.filter(sender=followers, user=following, notification_type=2)
+    if notify.exists():
+        notify.delete()
+
+
+
+# @receiver(post_save, sender=Follow)
+# def user_follow(sender, instance, created, **kwargs):
+#     if created:
+#         follow = instance
+#         sender = follow.followers
+#         following = follow.following
+#         notify = Notification.objects.filter(sender=sender, user=following, notification_type=2)
+#         notify.save()
+#
+#
+# @receiver(pre_delete, sender=Follow)
+# def user_unfollow(sender, instance, **kwargs):
+#     follow = instance
+#     sender = follow.followers
+#     following = follow.following
+#     notify = Notification.objects.filter(sender=sender, user=following, notification_type=2)
+#     notify.delete()

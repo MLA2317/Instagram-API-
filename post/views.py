@@ -1,11 +1,13 @@
 from django.shortcuts import render
+from rest_framework.pagination import PageNumberPagination
+
 from .serializer import PostSerializer, PostDetailSerializer, PostOtherAccountSerializer, CommentSerializer, \
-    LikeGetSerializer, LikePostSerializer, CommentLikeSerializer
+    LikeGetSerializer, LikePostSerializer, SaveSerializer, ExploreSerializer
 from rest_framework import generics, status, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .models import Post, Comment, PostOtherAccount, CommentLike, Like
+from .models import Post, Comment, PostOtherAccount, Like, Save
 
 
 class LikeListAPI(generics.ListAPIView): # done
@@ -92,31 +94,31 @@ class CommentDeleteApiView(APIView): # Done
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CommentLikeCreateAPi(generics.CreateAPIView): # Done
-    queryset = CommentLike.objects.all()
-    serializer_class = CommentLikeSerializer
-
-    def get_serializer_context(self):
-        ctx = super().get_serializer_context()
-        ctx['comment_id'] = self.kwargs.get('comment_id')
-        return ctx
-
-    def create(self, request, *args, **kwargs):
-        comment_id = self.kwargs.get('comment_id')
-        user_id = request.user
-        print(user_id)
-        try:
-            comment_id = Comment.objects.get(pk=comment_id)
-        except Comment.DoesNotExist:
-            return Response({'detail': 'Comment NOT Found!'}, status=status.HTTP_404_NOT_FOUND)
-        comment_likes = CommentLike.objects.filter(comment_id=comment_id, user_id=user_id).exists()
-        if comment_likes:
-            CommentLike.objects.filter(comment_id=comment_id, user_id=user_id).delete()
-            return Response('Un-like comment')
-
-        instance = CommentLike.objects.create(user_id=user_id, comment_id=comment_id)
-        serializer = CommentLikeSerializer(instance)
-        return Response(serializer.data)
+# class CommentLikeCreateAPi(generics.CreateAPIView): # Done
+#     queryset = CommentLike.objects.all()
+#     serializer_class = CommentLikeSerializer
+#
+#     def get_serializer_context(self):
+#         ctx = super().get_serializer_context()
+#         ctx['comment_id'] = self.kwargs.get('comment_id')
+#         return ctx
+#
+#     def create(self, request, *args, **kwargs):
+#         comment_id = self.kwargs.get('comment_id')
+#         user_id = request.user
+#         print(user_id)
+#         try:
+#             comment_id = Comment.objects.get(pk=comment_id)
+#         except Comment.DoesNotExist:
+#             return Response({'detail': 'Comment NOT Found!'}, status=status.HTTP_404_NOT_FOUND)
+#         comment_likes = CommentLike.objects.filter(comment_id=comment_id, user_id=user_id).exists()
+#         if comment_likes:
+#             CommentLike.objects.filter(comment_id=comment_id, user_id=user_id).delete()
+#             return Response('Un-like comment')
+#
+#         instance = CommentLike.objects.create(user_id=user_id, comment_id=comment_id)
+#         serializer = CommentLikeSerializer(instance)
+#         return Response(serializer.data)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -147,3 +149,23 @@ class PostOtherAccountAPi(viewsets.ModelViewSet):
         post_other_account = self.get_object()
         serializer = PostOtherAccountSerializer(post_other_account)
         return Response(serializer.data)
+
+
+class SaveListCreate(generics.ListCreateAPIView):
+    queryset = Save.objects.all()
+    serializer_class = SaveSerializer
+
+    def get_queryset(self):
+        return Save.objects.filter(account_id=self.request.user.id)
+
+
+class Pagination(PageNumberPagination):
+    page_size = 5
+
+
+class ExploreList(generics.ListAPIView):
+    queryset = Post.objects.all().order_by('?')
+    serializer_class = ExploreSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = Pagination
+    #pagination_size = 5

@@ -1,20 +1,37 @@
 from django.db import models
+from django.urls import reverse
+
 from account.models import Account, Follow
 from django.db.models.signals import post_save
+from notification.models import Notification
+import uuid
 
 
 class Post(models.Model):
+    #ids = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='user_post')
-    image = models.ImageField(upload_to='user/post/image/')
+    image = models.FileField(upload_to='user/post/image/')
     location = models.CharField(max_length=221, null=True, blank=True)
     description = models.TextField()
     archive = models.BooleanField(default=False)
     send = models.ForeignKey(Follow, on_delete=models.CASCADE, null=True, blank=True)
+    likes = models.IntegerField(default=0)
     created_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
 
+    # def get_absolute_url(self):
+    #     return reverse("post-details", args=[str(self.ids)])
+
     def __str__(self):
         return f'post of {self.user_id.username}'
+
+    @property
+    def likes_count(self):
+        return Like.objects.filter(post_id=self).count()
+
+    @property
+    def comment_count(self):
+        return Comment.objects.filter(post_id=self).count()
 
 
 class PostOtherAccount(models.Model):
@@ -33,6 +50,20 @@ class Like(models.Model):
 
     def __str__(self):
         return f'{self.id} || {self.user_id} - {self.post_id}'
+
+    def user_liked_post(sender, instance, *args, **kwargs):
+        like = instance
+        post = like.post
+        sender = like.user
+        notify = Notification(post=post, sender=sender, user=post.user)
+        notify.save()
+
+    def user_unliked_post(sender, instance, *args, **kwargs):
+        like = instance
+        post = like.post
+        sender = like.user
+        notify = Notification.objects.filter(post=post, sender=sender, notification_types=1)
+        notify.delete()
 
 
 class Comment(models.Model):
@@ -65,9 +96,13 @@ def comment_post_save(instance, sender, created, *args, **kwargs):
 
 post_save.connect(comment_post_save, sender=Comment)
 
+#
+# class CommentLike(models.Model):
+#     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='comment_like_follower')
+#     comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
 
-class CommentLike(models.Model):
-    user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='comment_like_follower')
-    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
 
+class Save(models.Model):
+    account_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='save_post')
+    posts = models.ForeignKey(Post, on_delete=models.CASCADE)
 

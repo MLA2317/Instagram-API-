@@ -1,10 +1,10 @@
 from django.contrib.auth.models import BaseUserManager, AbstractUser, PermissionsMixin
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractUser, PermissionsMixin
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
+from django.dispatch import receiver
 
 
 class AccountManager(BaseUserManager):
@@ -73,32 +73,9 @@ class Account(AbstractUser, PermissionsMixin):
         else:
             return 'Image not found'
 
-    # def follow(self, user):
-    #     """Follows a user."""
-    #     if user != self:
-    #         following_instance, created = Follow.objects.get_or_create(following=self)
-    #         following_instance.followers.add(user)
-    #
-    # def unfollow(self, user):
-    #     """Unfollows a user."""
-    #     if user != self:
-    #         following_instance, created = Follow.objects.get_or_create(following=self)
-    #         following_instance.followers.remove(user)
-
     @property
     def following_count(self):
-        try:  # 1-usul
-            following_instance = self.account_following.first()
-            if following_instance:
-                return following_instance.followers.count()
-            return 0
-        except AttributeError:
-            return 0
-
-        # try: # 2-usul
-        #     return self.account_following.aggregate(count=models.Count('followers'))['count']
-        # except AttributeError:
-        #     return 0
+        return self.account_following.count()
 
     @property
     def follower_count(self):
@@ -107,7 +84,7 @@ class Account(AbstractUser, PermissionsMixin):
 
 class Follow(models.Model):
     following = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_following')
-    followers = models.ManyToManyField(Account, related_name='followers')
+    followers = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='followers')
 
     def __str__(self):
         return self.following.username

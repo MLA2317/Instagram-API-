@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+  <title>Instagram Login Form</title>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="exampleInputFirstName1" class="form-label">First Name</label>
+                <input type="text" name="first_name" value="{{ profile.user.first_name }}" class="form-control" id="exampleInputFirstName1" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputLastName1" class="form-label">Last Name</label>
+                <input type="text" name="last_name"   value="{{ profile.user.last_name }}" class="form-control" id="exampleInputLastName1" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputBio1" class="form-label">Bio</label>
+                <textarea name="bio" class="form-control" id="exampleInputBio1"> {{ profile.bio }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputGender1" class="form-label">Gender</label>
+                <input type="text" name="gender" value="{{ profile.gender }}" class="form-control" id="exampleInputGender1" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                <input type="email" name="email" value="{{ profile.user.email }}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputAvatar1" class="form-label">Avatar Image</label>
+                <input type="file" value="{% if profile.avatar %}{{ profile.avatar.url }}{% endif %}" name="avatar" class="form-control" id="exampleInputAvatar1">
+            </div>
+             <div class="mb-3">
+                <label for="exampleInputPhoneNumber1" class="form-label">Phone Number</label>
+                <input type="text" name="phone_number" value="{{ profile.phone_number }}" class="form-control" id="exampleInputPhoneNUmber1" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3" style="margin-top: 10px;">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <nav class="footer-nav">
+          <ul>
+            <li>
+              <a href="#">About us</a>
+            </li>
+            <li>
+              <a href="#">Support</a>
+            </li>
+            <li>
+              <a href="#">Press</a>
+            </li>
+            <li>
+              <a href="#">Api</a>
+            </li>
+            <li>
+              <a href="#">Jobs</a>
+            </li>
+            <li>
+              <a href="#">Privacy</a>
+            </li>
+            <li>
+              <a href="#">Terms</a>
+            </li>
+            <li>
+              <a href="#">Directory</a>
+            </li>
+            <li>
+              <a href="#">Profiles</a>
+            </li>
+            <li>
+              <a href="#">Hashtags</a>
+            </li>
+            <li>
+              <a href="#">Languages</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="copyright-notice">
+          &copy 2019 Instagram
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+
+</html>
+{% endblock content %}

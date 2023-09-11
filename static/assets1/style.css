@@ -414,29 +414,58 @@ img { max-width: 100%; }
     cursor: pointer;
 }
 
+/* Post style */
 .post__content {
     display: flex;
     position: relative;
 }
+
 .post__medias {
     display: flex;
     overflow-y: hidden;
     overflow-x: auto;
-
     width: 100%;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    scrollbar-width: none;
+    scrollbar-width: none;  /* For Firefox */
 }
+
 .post__medias::-webkit-scrollbar {
-    display: none;
+    display: none;  /* For Chrome, Safari, and Opera */
 }
-.post__media {
-    width: 100%;
+
+.post__media,
+.post__medias video {
+    width: 700px;
+    height: 348px;
+    object-fit: cover;
     flex: none;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 }
+
+/*.post__content {*/
+/*    display: flex;*/
+/*    position: relative;*/
+/*}*/
+/*.post__medias {*/
+/*    display: flex;*/
+/*    overflow-y: hidden;*/
+/*    overflow-x: auto;*/
+/*    width: 100%;*/
+/*    scroll-snap-type: x mandatory;*/
+/*    scroll-behavior: smooth;*/
+/*    scrollbar-width: none;*/
+/*}*/
+/*.post__medias::-webkit-scrollbar {*/
+/*    display: none;*/
+/*}*/
+/*.post__media {*/
+/*    width: 100%;*/
+/*    flex: none;*/
+/*    scroll-snap-align: start;*/
+/*    scroll-snap-stop: always;*/
+/*}*/
 
 .post__footer {
     background-color: var(--primary);
@@ -549,6 +578,10 @@ img { max-width: 100%; }
     margin: 20px 0 22px;
 }
 .side-menu__user-avatar {
+    /*display: none; !* Default holatda yashirilgan *!*/
+    /*width: 300px; !* Masalan, rasmning kengligi *!*/
+    /*position: absolute;*/
+    /*z-index: 1000;*/
     width: 56px;
     height: 56px;
     border-radius: 50%;

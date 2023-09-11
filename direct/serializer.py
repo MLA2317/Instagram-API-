@@ -10,7 +10,7 @@ class DirectGETMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectMessage
-        fields = ('id', 'sender_name', 'receiver_name', 'message', 'file', 'is_read', 'created_date')
+        fields = ('id', 'user_id', 'sender_name', 'receiver_name', 'message', 'file', 'is_read', 'created_date')
         extra_kwargs = {
             'post_id': {'required': False}
         }
@@ -25,7 +25,7 @@ class DirectGETMessageSerializer(serializers.ModelSerializer):
 class DirectPostMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = DirectMessage
-        fields = ('id', 'sender', 'receiver', 'message', 'file', 'is_read', 'created_date')
+        fields = ('id', 'user_id', 'sender', 'receiver', 'message', 'file', 'is_read', 'created_date')
 
     def validate_sender(self, value):
         request_user = self.context['request'].user

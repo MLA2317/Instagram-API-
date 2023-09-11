@@ -5,4 +5,4 @@ from .models import DirectMessage
 @admin.register(DirectMessage)
 class DirectMessageAdmin(admin.ModelAdmin):
     list_editable = ['is_read']
-    list_display = ['id', 'sender', 'receiver', 'file', 'is_read', 'created_date']
+    list_display = ['id', 'user_id', 'sender', 'receiver', 'file', 'is_read', 'created_date']

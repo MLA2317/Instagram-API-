@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .explore-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3-column layout */
+            gap: 1%; /* small gaps for the white space between media */
+            width: 100%;
+        }
+
+        .post-item {
+            position: relative; /* set to position play icon over videos */
+            overflow: hidden; /* ensure content doesn't exceed bounds */
+            border-radius: 3%; /* subtle rounded corners like Instagram */
+            background-color: #f9f9f9; /* a light grey placeholder color */
+            height: 250px;
+            width: 350px;
+        }
+
+        .post-item img,
+        .post-item video {
+            cursor: pointer; /* Videoga bosilganda qo'l ikonini ko'rsatish */
+        }
+
+        .post-item:hover img,
+        .post-item:hover video {
+            transform: scale(1.03);
+        }
+
+        /* Icon to show a video play symbol */
+        .post-item.video:hover:after {
+            content: '\25BA'; /* Unicode play symbol */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 50px;
+            color: white;
+            transform: translateX(-50%) translateY(-50%);
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            opacity: 0.7;
+        }
+
+        /* Style for videos */
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+
+        .page-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 5px 15px;
+            background-color: #f7f7f7;
+            border: 1px solid #ccc;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .page-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .current-page-number {
+            padding: 5px 15px;
+            background-color: #f7f7f7;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .explore-container {
+            position: relative;
+            /* Other properties for explore-container */
+        }
+
+        .pagination-controls {
+            position: absolute;
+            bottom: 10px; /* Gives a 10px space from the bottom. Adjust as you like. */
+            left: 10px; /* Gives a 10px space from the left. Adjust as you like. */
+        }
+    </style>
+<div class="explore-container">
+    <h2>Explore</h2>
+    <div class="posts-grid">
+        {% for post in posts %}
+
+            <div class="post-item">
+                <a href="{% url 'post:detail' post.id %}">
+                    {% with file_ext=post.image.url|lower|slice:"-4:" %}
+                        {% if file_ext in ".mp4,.webm,.ogg,.mov" %}
+                            <video autoplay muted loop playsinline>
+                                <source src="{{ post.image.url }}" type="video/mp4">
+                            </video>
+                        {% elif file_ext in ".jpg,.jpeg,.png,.gif" %}
+                            <img src="{{ post.image.url }}" alt="Image for {{ post.user_id.username }}">
+                        {% endif %}
+                    {% endwith %}
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+    {#          Paginator           #}
+       <div class="pagination-controls">
+        {% if posts.has_previous %}
+{#            <a class="page-button" href="?page=1">1</a>#}
+            <a class="page-button" href="?page={{ posts.previous_page_number }}">Prev</a>
+        {% endif %}
+
+        <!-- Loop to display individual page numbers -->
+        {% for i in posts.paginator.page_range %}
+            {% if posts.number == i %}
+                <span class="current-page-number">{{ i }}</span>
+            {% else %}
+                <a class="page-button" href="?page={{ i }}">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+            <a class="page-button" href="?page={{ posts.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+{% endblock %}

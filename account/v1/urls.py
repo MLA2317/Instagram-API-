@@ -1,13 +1,18 @@
 from django.urls import path
-from .view import register
-from django.contrib.auth import views
+from .view import Register, profile, EditProfile, Login, logout_view, follow
 
-
-# app_name = 'account'
+app_name = 'v1'
 
 urlpatterns = [
-    path('register/', register, name='sign-up'),
-    path('login/', views.LoginView.as_view(template_name='register/login.html'), name='sign-in'), #redirect_authenticated_user=True
-    path('logout/', views.LogoutView.as_view(template_name='register/logout.html'), name='sign-out')
+    path('register/', Register.as_view(), name='sign-up'),
+    path('login/', Login.as_view(),  name='sign-in'), #redirect_authenticated_user=True
+    path('logout/', logout_view, name='sign-out'),
+
+    path('profile/<str:username>/', profile, name='profile'),
+    path('edit/', EditProfile, name='editprofile'),
+
+    path('follow/<str:username>/<int:option>/', follow, name='follow')
+
+    # path('following/', following, name='following')
 
 ]

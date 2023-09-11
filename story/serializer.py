@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Story, StoryMarkFollower
+from .models import Story, StoryMarkFollower, Archive
 
 
 class StoryMarkFollowSerializer(serializers.ModelSerializer):
@@ -9,9 +9,15 @@ class StoryMarkFollowSerializer(serializers.ModelSerializer):
 
 
 class StorySerializer(serializers.ModelSerializer):
-    StoryMarkFollow = StoryMarkFollowSerializer(many=True)
+    #storymarkfollow = StoryMarkFollowSerializer(many=True)
 
     class Meta:
         model = Story
-        fields = ('id', 'user_id', 'content', 'caption', 'StoryMarkFollow' 'posted')
+        fields = ('id', 'user_id', 'content', 'caption', 'posted')
+
+
+class ArchiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Archive
+        fields = ('id', 'story', 'user_id', 'content', 'archived_at')
 

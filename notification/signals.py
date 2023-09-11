@@ -19,20 +19,22 @@ def user_liked_post(sender, instance, created, **kwargs):
 def user_followed_user(sender, instance, created, **kwargs):
     if created:
         Notification.objects.create(
-            sender=instance.user,
-            user=instance.followed,
+            sender=instance.following,
+            user=instance.followers,
             notification_type=2,  # 2 for 'Follow'
-            text_preview=f"{instance.user.username} started following you."
+            text_preview=f"{instance.followers.username} started following you."
         )
 
 
 @receiver(post_save, sender='post.Comment')
 def user_commented_on_post(sender, instance, created, **kwargs):
     if created:
+        user_to_notify = instance.post_id.user_id
+
         Notification.objects.create(
-            post=instance.post,
-            sender=instance.user,
-            user=instance.post.author,
+            post=instance.post_id,
+            sender=instance.user_id,
+            user=user_to_notify,
             notification_type=3,  # 3 for 'Comment'
-            text_preview=f"{instance.user.username} commented on your post: {instance.text[:50]}..."  # Preview of the comment
+            text_preview=f"{instance.user_id.username} commented on your post: {instance.message[:50]}..."  # Preview of the comment
         )

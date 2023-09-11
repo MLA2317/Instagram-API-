@@ -28,5 +28,5 @@ urlpatterns = [
     path('account/<int:account_id>/followers/list/', FollowerList.as_view()),
 
     # v1
-    path('v1/', include('account.v1.urls'))
+    path('v1/', include('account.v1.urls', namespace='account'))
 ]
