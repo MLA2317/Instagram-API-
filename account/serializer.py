@@ -34,10 +34,16 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=50, required=True)
     password = serializers.CharField(max_length=25, required=True)
+    tokens = serializers.SerializerMethodField(read_only=True)
+
+    def get_tokens(self, obj):
+        username = obj.get('username')
+        tokens = Account.objects.get(username=username).tokens
+        return tokens
 
     class Meta:
         model = Account
-        fields = ('username', 'password')
+        fields = ('username', 'password', 'tokens')
 
     def validate(self, attrs):
         username = attrs.get('username')

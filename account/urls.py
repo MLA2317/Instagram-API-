@@ -1,6 +1,11 @@
 from django.urls import path, include
 from .views import RegisterAPI, LoginAPI, ProfileList, FollowingList, FollowRUD, AllAccountApi, FollowCreate,\
     FollowerList, LocationListCreate
+from rest_framework_simplejwt.views import (
+     TokenObtainPairView,
+     TokenRefreshView,
+     TokenBlacklistView,
+)
 from rest_framework.routers import DefaultRouter
 
 # router = DefaultRouter()
@@ -26,6 +31,10 @@ urlpatterns = [
     path('following/unfollow/<int:pk>/users/<int:followers>/', FollowRUD.as_view()),
     path('following/create/', FollowCreate.as_view()),
     path('account/<int:account_id>/followers/list/', FollowerList.as_view()),
+
+    # refresh token
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
     # v1
     path('v1/', include('account.v1.urls', namespace='account'))

@@ -3,8 +3,9 @@ from django.db import models
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.dispatch import receiver
+
 
 
 class AccountManager(BaseUserManager):
@@ -72,6 +73,15 @@ class Account(AbstractUser, PermissionsMixin):
             return mark_safe(f"<a href='{self.avatar.url}'><img src='{self.avatar.url}' style='height:43px;'/></a>")
         else:
             return 'Image not found'
+
+    @property
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        data = {
+            'refresh': str(refresh),  # bu - access token ni yangilab beradi
+            'access': str(refresh.access_token)  # bu - saytga kirish un ruhsat
+        }
+        return data
 
     @property
     def following_count(self):

@@ -37,7 +37,7 @@ def explore(request):
     posts = Post.objects.all().order_by('?')
 
     #paginator
-    paginator = Paginator(posts, 5)
+    paginator = Paginator(posts, 50)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 

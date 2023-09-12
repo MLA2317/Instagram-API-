@@ -160,7 +160,7 @@ class SaveListCreate(generics.ListCreateAPIView):
 
 
 class Pagination(PageNumberPagination):
-    page_size = 5
+    page_size = 50
 
 
 class ExploreList(generics.ListAPIView):
