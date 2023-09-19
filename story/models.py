@@ -20,10 +20,8 @@ class StoryMarkFollower(models.Model):
 
 class Archive(models.Model):
     story = models.OneToOneField(Story, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(Account, on_delete=models.CASCADE)
-    content = models.FileField(upload_to='archive_story/')
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.story} of {self.user_id}"
+        return f"Archive of {self.story.user_id.username}"
 

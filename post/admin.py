@@ -1,15 +1,16 @@
 from django.contrib import admin
-from .models import Post, PostOtherAccount, Like, Comment, Save
+from .models import Post, Like, Comment, Save
 
 
-# admin.site.register(Post)
-admin.site.register(PostOtherAccount)
 admin.site.register(Like)
 admin.site.register(Save)
 
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_id', 'image', 'location', 'archive', 'send', 'created_date', 'update_date')
+    list_display = ('id', 'user_id', 'image', 'created_date', 'update_date')
+
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):

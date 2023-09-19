@@ -3,12 +3,17 @@ from .serializer import StorySerializer, ArchiveSerializer
 from rest_framework import generics, permissions
 from .models import Story, Archive
 from .permission import IsOwnerOrAdmin
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class StoryListCreate(generics.ListCreateAPIView):
     queryset = Story.objects.all()
     serializer_class = StorySerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        return Story.objects.filter(user_id=self.request.user.id)
 
 
 class StoryDestroy(generics.DestroyAPIView):
@@ -26,5 +31,5 @@ class ArchiveList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Archive.objects.filter(user_id=self.request.user.id)
+        return Archive.objects.filter(story__user_id=self.request.user.id)
 

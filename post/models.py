@@ -1,9 +1,9 @@
 from django.db import models
 from django.urls import reverse
-
 from account.models import Account, Follow
 from django.db.models.signals import post_save
 from notification.models import Notification
+from PIL import Image
 import uuid
 
 
@@ -11,10 +11,7 @@ class Post(models.Model):
     #ids = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='user_post')
     image = models.FileField(upload_to='user/post/image/')
-    location = models.CharField(max_length=221, null=True, blank=True)
     description = models.TextField()
-    archive = models.BooleanField(default=False)
-    send = models.ForeignKey(Follow, on_delete=models.CASCADE, null=True, blank=True)
     likes = models.IntegerField(default=0)
     created_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
@@ -33,10 +30,14 @@ class Post(models.Model):
     def comment_count(self):
         return Comment.objects.filter(post_id=self).count()
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
-class PostOtherAccount(models.Model):
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True, related_name='other_account_post')
-    users_id = models.ManyToManyField(Account,)
+        img = Image.open(self.image.path)
+        if img.height > 600 or img.width > 480:
+            output_size = (600, 480)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
 
 
 # class SendPost(models.Model):

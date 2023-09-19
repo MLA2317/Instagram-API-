@@ -18,6 +18,7 @@ def user_liked_post(sender, instance, created, **kwargs):
 @receiver(post_save, sender='account.Follow')
 def user_followed_user(sender, instance, created, **kwargs):
     if created:
+
         Notification.objects.create(
             sender=instance.following,
             user=instance.followers,

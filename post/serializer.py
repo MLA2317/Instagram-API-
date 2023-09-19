@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Post, PostOtherAccount, Like, Comment, Save
+from .models import Post, Like, Comment, Save
 from account.serializer import ProfilesSerializer, AccountListSerializer
-from account.models import Account
+from django_countries.serializer_fields import CountryField
 
 
 class LikeGetSerializer(serializers.ModelSerializer): # done
@@ -60,23 +60,13 @@ class CommentSerializer(serializers.ModelSerializer): # Done
         return instance
 
 
-# class CommentLikeSerializer(serializers.ModelSerializer): #done
-#     class Meta:
-#         model = CommentLike
-#         fields = ('comment_id',)
-#         extra_kwargs = {
-#             'user_id': {'required': False},
-#             'comment_id': {'required': False}
-#         }
-
-
 class PostDetailSerializer(serializers.ModelSerializer): # Done
     likes_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('id', 'user_id', 'image', 'location', 'description', 'archive', 'send', 'likes_count', 'comment_count',
+        fields = ('id', 'user_id', 'image', 'description', 'likes_count', 'comment_count',
                   'created_date', 'update_date')
 
     def get_likes_count(self, obj):
@@ -87,27 +77,11 @@ class PostDetailSerializer(serializers.ModelSerializer): # Done
 
 
 class PostSerializer(serializers.ModelSerializer): # Done
+    image = serializers.FileField()
+
     class Meta:
         model = Post
-        fields = ('id', 'user_id', 'image', 'location', 'description', 'archive', 'send')
-
-
-class PostOtherAccountSerializer(serializers.ModelSerializer):
-    users_id = AccountListSerializer(many=True)
-
-    class Meta:
-        model = PostOtherAccount
-        fields = ('id', 'post_id', 'users_id')
-
-    def create(self, validated_data):
-        users_data = validated_data.pop('users_id')
-        post_other_account = PostOtherAccount.objects.create(**validated_data)
-        print(post_other_account)
-        for user_data in users_data:
-            account, created = Account.objects.get_or_create(**user_data)
-            post_other_account.users_id.add(account)
-            print('pp', post_other_account)
-        return post_other_account
+        fields = ('id', 'user_id', 'image', 'description', 'created_date')
 
 
 class SaveSerializer(serializers.ModelSerializer):
@@ -119,9 +93,10 @@ class SaveSerializer(serializers.ModelSerializer):
 
 
 class ExploreSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Post
-        fields = ('id', 'image')
+        fields = ('id', 'user_id', 'image')
 
 
 

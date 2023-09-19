@@ -9,7 +9,7 @@ from django.urls import resolve, reverse_lazy
 from django.db import transaction
 from django.views.generic import CreateView
 from .forms import AccountRegisterForm
-from ..models import Account, Follow, Location
+from ..models import Account, Follow
 from post.models import Post, Save
 from django.conf import settings
 from django.contrib.auth.views import LoginView

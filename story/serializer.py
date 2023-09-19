@@ -10,6 +10,7 @@ class StoryMarkFollowSerializer(serializers.ModelSerializer):
 
 class StorySerializer(serializers.ModelSerializer):
     #storymarkfollow = StoryMarkFollowSerializer(many=True)
+    content = serializers.FileField()
 
     class Meta:
         model = Story
@@ -17,7 +18,9 @@ class StorySerializer(serializers.ModelSerializer):
 
 
 class ArchiveSerializer(serializers.ModelSerializer):
+    story = StorySerializer(read_only=True)
+
     class Meta:
         model = Archive
-        fields = ('id', 'story', 'user_id', 'content', 'archived_at')
+        fields = ('id', 'story', 'archived_at')
 

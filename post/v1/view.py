@@ -3,7 +3,7 @@ from django.http import Http404, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from ..models import Post, PostOtherAccount, Like, Comment, Save
+from ..models import Post, Like, Comment, Save
 from account.models import Account, Follow
 from django.contrib.auth.decorators import login_required
 from .forms import NewPostform, CommentForm

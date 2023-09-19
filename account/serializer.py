@@ -1,18 +1,14 @@
 from rest_framework import serializers
-from .models import Account, Follow, Location
+from .models import Account, Follow
+from django_countries.fields import CountryField
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = ('id', 'title')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=6, max_length=25, write_only=True)
     password2 = serializers.CharField(min_length=6, max_length=25, write_only=True)
+    location = CountryField()
 
     class Meta:
         model = Account
@@ -61,22 +57,26 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class ProfilesSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(read_only=True)
+    location = CountryField()
+    avatar = serializers.FileField()
+    first_name = serializers.CharField(max_length=200),
+    last_name = serializers.CharField(max_length=200)
     # following_count = FollowingSerializer(read_only=True)
     # follower_count = FollowerSerializer(read_only=True)
 
+
     class Meta:
         model = Account
-        fields = ('id', 'username', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count', 'created_date')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'gender', 'location', 'phone_number', 'following_count', 'follower_count', 'created_date')
 
 
 class FollowingListSerializer(serializers.ModelSerializer):
     users_name = serializers.SerializerMethodField()
-    is_following_back = serializers.SerializerMethodField()
+    following_back = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
-        fields = ('id', 'following', 'users_name', 'is_following_back')
+        fields = ('id', 'following', 'users_name', 'following_back')
 
     def get_users_name(self, obj):
         return {
@@ -84,7 +84,7 @@ class FollowingListSerializer(serializers.ModelSerializer):
             'name': obj.followers.username
         }
 
-    def get_is_following_back(self, obj):
+    def get_following_back(self, obj):
         return Follow.objects.filter(following=obj.followers, followers=obj.following).exists()
 
 
@@ -116,4 +116,3 @@ class FollowerSerializer(serializers.ModelSerializer):
 
     def get_user_name_following(self, obj):
         return obj.following.username
-

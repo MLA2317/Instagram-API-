@@ -1,13 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
-from .serializer import PostSerializer, PostDetailSerializer, PostOtherAccountSerializer, CommentSerializer, \
+from .serializer import PostSerializer, PostDetailSerializer, CommentSerializer, \
     LikeGetSerializer, LikePostSerializer, SaveSerializer, ExploreSerializer
-from rest_framework import generics, status, permissions, viewsets
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .models import Post, Comment, PostOtherAccount, Like, Save
+from .models import Post, Comment, Like, Save
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class LikeListAPI(generics.ListAPIView): # done
@@ -121,34 +122,54 @@ class CommentDeleteApiView(APIView): # Done
 #         return Response(serializer.data)
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostList(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.user
+        posts = Post.objects.filter(user_id=user_id)
+        print('poss', posts)
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PostCreateView(generics.CreateAPIView):
     queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
-    # for user.id belong to posts
-    def get_queryset(self):
-        return Post.objects.filter(user_id=self.request.user.id)
+    def create(self, request, *args, **kwargs):
 
-    def get_serializer_class(self):
-        if self.action in ['create']:
-            return PostSerializer
-        return PostDetailSerializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user_id != request.user.id:
-            return Response({'detail': "Not found"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        #   serializer.validated_data['user_id'] = self.request.user
+        serializer.validated_data['user_id'] = self.request.user
+        print('ser', serializer)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        print('headers', headers)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class PostOtherAccountAPi(viewsets.ModelViewSet):
-    queryset = PostOtherAccount.objects.all()
-    serializer_class = PostOtherAccountSerializer
+class PostDeleteAndGetView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-    def retrieve(self, request, *args, **kwargs):
-        post_other_account = self.get_object()
-        serializer = PostOtherAccountSerializer(post_other_account)
-        return Response(serializer.data)
+    def get(self, request, post_id, *args, **kwargs):
+        user = request.user
+        post = get_object_or_404(Post, id=post_id, user_id=user)
+        print(post)
+        serializer = PostSerializer(post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, post_id, *args, **kwargs):
+        user = request.user
+        post = get_object_or_404(Post, id=post_id, user_id=user)
+        post.delete()
+        return Response({'success': True, 'detail': 'Successfully deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class SaveListCreate(generics.ListCreateAPIView):

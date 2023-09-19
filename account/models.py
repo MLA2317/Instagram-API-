@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from phonenumber_field.modelfields import PhoneNumberField
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_countries.fields import CountryField
 from django.dispatch import receiver
 
 
@@ -34,13 +35,6 @@ class AccountManager(BaseUserManager):
         return user
 
 
-class Location(models.Model):
-    title = models.CharField(max_length=221)
-
-    def __str__(self):
-        return self.title
-
-
 class Account(AbstractUser, PermissionsMixin):
     username = models.CharField(max_length=221, unique=True, db_index=True)
     first_name = models.CharField(max_length=50)
@@ -56,7 +50,7 @@ class Account(AbstractUser, PermissionsMixin):
     bio = models.TextField()
     phone_number = PhoneNumberField(verbose_name='Phone Number', null=True, blank=True)
     avatar = models.ImageField(upload_to='profile/', null=True, blank=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='account_location', null=True)
+    location = CountryField()
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
@@ -73,6 +67,15 @@ class Account(AbstractUser, PermissionsMixin):
             return mark_safe(f"<a href='{self.avatar.url}'><img src='{self.avatar.url}' style='height:43px;'/></a>")
         else:
             return 'Image not found'
+
+    @property
+    def avatar_url(self):
+        if self.avatar:
+            if settings.DEBUG:
+                return f"{settings.LOCALE_BASE_URL}{self.avatar.url}"
+            return f"{settings.PROD_BASE_URL}{self.avatar.url}"
+        return None
+
 
     @property
     def tokens(self):
