@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import Notification
 
@@ -16,15 +16,35 @@ def user_liked_post(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender='account.Follow')
-def user_followed_user(sender, instance, created, **kwargs):
+def user_follow(sender, instance, created, **kwargs):
     if created:
+        followers = instance.followers
+        following = instance.following
+        notify = Notification(
+            sender=following,
+            user=followers,
+            notification_type=2,
+            text_preview=f"{instance.following.username} started following you.")
+        notify.save()
 
-        Notification.objects.create(
-            sender=instance.following,
-            user=instance.followers,
-            notification_type=2,  # 2 for 'Follow'
-            text_preview=f"{instance.followers.username} started following you."
-        )
+
+@receiver(pre_delete, sender='account.Follow')
+def user_unfollow(sender, instance, **kwargs):
+    followers = instance.followers
+    following = instance.following
+    notify = Notification.objects.filter(sender=followers, user=following, notification_type=2)
+    if notify.exists():
+        notify.delete()
+
+
+# @receiver(post_save, sender='account.Follow')
+# def user_followed_user(sender, instance, created, **kwargs):
+#     Notification.objects.create(
+#         sender=instance.followers,
+#         user=instance.following,
+#         notification_type=2,  # 2 for 'Follow'
+#         text_preview=f"{instance.followers.username} started following you."
+#     )
 
 
 @receiver(post_save, sender='post.Comment')

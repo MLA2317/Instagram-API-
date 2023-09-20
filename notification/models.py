@@ -20,22 +20,22 @@ class Notification(models.Model):
     is_seen = models.BooleanField(default=False)
 
 
-@receiver(post_save, sender=Follow)
-def user_follow(sender, instance, created, **kwargs):
-    if created:
-        followers = instance.followers
-        following = instance.following
-        notify = Notification(sender=followers, user=following, notification_type=2)
-        notify.save()
-
-
-@receiver(pre_delete, sender=Follow)
-def user_unfollow(sender, instance, **kwargs):
-    followers = instance.followers
-    following = instance.following
-    notify = Notification.objects.filter(sender=followers, user=following, notification_type=2)
-    if notify.exists():
-        notify.delete()
+# @receiver(post_save, sender=Follow)
+# def user_follow(sender, instance, created, **kwargs):
+#     if created:
+#         followers = instance.followers
+#         following = instance.following
+#         notify = Notification(sender=followers, user=following, notification_type=2)
+#         notify.save()
+#
+#
+# @receiver(pre_delete, sender=Follow)
+# def user_unfollow(sender, instance, **kwargs):
+#     followers = instance.followers
+#     following = instance.following
+#     notify = Notification.objects.filter(sender=followers, user=following, notification_type=2)
+#     if notify.exists():
+#         notify.delete()
 
 
 
